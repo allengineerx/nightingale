@@ -1,3 +1,5 @@
+![](public/nightingale.png)
+
 # Nightingale
 
 Nightingale is a Ruby framework for building interactive data and AI web applications with a simple, declarative DSL. It brings the "script-as-app" experience (like Streamlit) to the Ruby ecosystem.
@@ -76,6 +78,20 @@ session_state[:count] += 1 if button "Increment"
 ## Architecture
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for details on how Nightingale works.
+
+## Development
+
+To set up the project for development (including installing Ruby gems and frontend dependencies):
+
+```bash
+bin/setup
+```
+
+To run the demo app during development:
+
+```bash
+bin/nightingale run examples/demo/app.rb
+```
 
 ## License
 

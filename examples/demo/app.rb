@@ -1,4 +1,6 @@
-require 'nightingale'
+# frozen_string_literal: true
+
+require "nightingale"
 
 title "Nightingale Demo"
 

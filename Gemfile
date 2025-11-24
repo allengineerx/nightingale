@@ -1,12 +1,15 @@
-source 'https://rubygems.org'
+# frozen_string_literal: true
 
-gem 'sinatra'
-gem 'puma'
-gem 'faye-websocket'
-gem 'json'
-gem 'listen' # For file watching
+source "https://rubygems.org"
+
+# Specify your gem's dependencies in nightingale.gemspec
+gemspec
 
 group :test do
-  gem 'rspec'
-  gem 'rack-test'
+  gem "rack-test"
+  gem "rspec", "~> 3.0"
+end
+
+group :development do
+  gem "rubocop"
 end

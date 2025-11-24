@@ -1,12 +1,14 @@
-require 'sinatra/base'
-require 'faye/websocket'
-require 'json'
-require 'listen'
+# frozen_string_literal: true
+
+require "sinatra/base"
+require "faye/websocket"
+require "json"
+require "listen"
 
 module Nightingale
   class Server < Sinatra::Base
-    set :server, 'puma'
-    set :bind, '0.0.0.0'
+    set :server, "puma"
+    set :bind, "0.0.0.0"
     set :port, 4567
 
     # Store runners per session (connection)
@@ -16,19 +18,20 @@ module Nightingale
 
     def self.run!
       # Start file watcher
-      script_path = ENV['NIGHTINGALE_SCRIPT']
+      script_path = ENV["NIGHTINGALE_SCRIPT"]
       if script_path && File.exist?(script_path)
         puts "Watching #{script_path} for changes..."
-        listener = Listen.to(File.dirname(script_path), only: /#{File.basename(script_path)}$/) do |modified, added, removed|
+        listener = Listen.to(File.dirname(script_path),
+                             only: /#{File.basename(script_path)}$/) do |modified, added, removed|
           puts "File changed: #{modified}"
           # Trigger rerun for all connections
           @@connections.each do |ws|
             runner = @@runners[ws.object_id]
-            if runner
-              puts "Rerunning for connection #{ws.object_id}"
-              tree = runner.run
-              ws.send({ type: 'render', components: tree }.to_json)
-            end
+            next unless runner
+
+            puts "Rerunning for connection #{ws.object_id}"
+            tree = runner.run
+            ws.send({ type: "render", components: tree }.to_json)
           end
         end
         listener.start
@@ -37,11 +40,11 @@ module Nightingale
       super
     end
 
-    get '/' do
+    get "/" do
       "Nightingale Server Running. Connect via WebSocket at /ws"
     end
 
-    get '/ws' do
+    get "/ws" do
       if Faye::WebSocket.websocket?(env)
         ws = Faye::WebSocket.new(env)
 
@@ -50,20 +53,20 @@ module Nightingale
           @@connections << ws
 
           # Initialize runner for this connection
-          script_path = ENV['NIGHTINGALE_SCRIPT']
+          script_path = ENV["NIGHTINGALE_SCRIPT"]
           runner = Nightingale::Runner.new(script_path)
           @@runners[ws.object_id] = runner
 
           # Initial run
           tree = runner.run
-          ws.send({ type: 'render', components: tree }.to_json)
+          ws.send({ type: "render", components: tree }.to_json)
         end
 
         ws.on :message do |event|
           data = JSON.parse(event.data)
           puts "Received message: #{data}"
 
-          if data['type'] == 'event'
+          if data["type"] == "event"
             runner = @@runners[ws.object_id]
             if runner
               # Rerun with event
@@ -75,13 +78,11 @@ module Nightingale
               # For MVP, let's assume we just update the specific widget value in the runner's state?
               # Or we pass it to run.
 
-              widget_values = data['values'] || {}
-              if data['id'] && data.key?('value')
-                 widget_values[data['id']] = data['value']
-              end
+              widget_values = data["values"] || {}
+              widget_values[data["id"]] = data["value"] if data["id"] && data.key?("value")
 
               tree = runner.run(data, widget_values)
-              ws.send({ type: 'render', components: tree }.to_json)
+              ws.send({ type: "render", components: tree }.to_json)
             end
           end
         end

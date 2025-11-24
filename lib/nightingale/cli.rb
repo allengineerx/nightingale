@@ -1,5 +1,7 @@
-require 'fileutils'
-require 'socket'
+# frozen_string_literal: true
+
+require "fileutils"
+require "socket"
 
 module Nightingale
   class CLI
@@ -10,21 +12,21 @@ module Nightingale
       # Copy frontend template
       # In a real gem, this would be properly located.
       # For this repo, we assume we are running from the root.
-      gem_root = File.expand_path('../../..', __FILE__)
-      frontend_template = File.join(gem_root, 'frontend')
+      gem_root = File.expand_path("../..", __dir__)
+      frontend_template = File.join(gem_root, "frontend")
 
       if File.directory?(frontend_template)
         puts "Copying frontend template..."
-        FileUtils.cp_r(frontend_template, File.join(name, 'frontend'))
+        FileUtils.cp_r(frontend_template, File.join(name, "frontend"))
 
         # Clean up node_modules and other artifacts from the template copy
-        FileUtils.rm_rf(File.join(name, 'frontend', 'node_modules'))
-        FileUtils.rm_rf(File.join(name, 'frontend', 'dist'))
-        FileUtils.rm_rf(File.join(name, 'frontend', '.git'))
+        FileUtils.rm_rf(File.join(name, "frontend", "node_modules"))
+        FileUtils.rm_rf(File.join(name, "frontend", "dist"))
+        FileUtils.rm_rf(File.join(name, "frontend", ".git"))
 
         # Create a basic app.rb
         puts "Creating sample app.rb..."
-        File.write(File.join(name, 'app.rb'), <<~RUBY)
+        File.write(File.join(name, "app.rb"), <<~RUBY)
           require 'nightingale'
 
           title "My Nightingale App"
@@ -37,13 +39,13 @@ module Nightingale
 
         # Create Gemfile
         puts "Creating Gemfile..."
-        File.write(File.join(name, 'Gemfile'), <<~RUBY)
+        File.write(File.join(name, "Gemfile"), <<~RUBY)
           source 'https://rubygems.org'
           gem 'nightingale', path: '#{gem_root}' # Local path for now
         RUBY
 
         puts "Installing frontend dependencies..."
-        Dir.chdir(File.join(name, 'frontend')) do
+        Dir.chdir(File.join(name, "frontend")) do
           system("npm install")
 
           puts "Initializing Shadcn UI components..."
@@ -63,8 +65,8 @@ module Nightingale
 
           # Let's install common components
           components = %w[button slider card input label table separator]
-          puts "Installing components: #{components.join(', ')}..."
-          system("npx shadcn@latest add #{components.join(' ')} --yes --overwrite")
+          puts "Installing components: #{components.join(", ")}..."
+          system("npx shadcn@latest add #{components.join(" ")} --yes --overwrite")
         end
 
         puts "Project created successfully!"
@@ -86,15 +88,15 @@ module Nightingale
 
       # Start Backend (Sinatra)
       server_pid = fork do
-        ENV['NIGHTINGALE_SCRIPT'] = script_path
+        ENV["NIGHTINGALE_SCRIPT"] = script_path
         # Suppress Sinatra startup logs if needed, or keep them
-        require 'nightingale/server'
+        require "nightingale/server"
         Nightingale::Server.run!
       end
 
       # Start Frontend (Vite)
       # Check if we are in a project with a frontend folder
-      frontend_dir = File.join(Dir.pwd, 'frontend')
+      frontend_dir = File.join(Dir.pwd, "frontend")
       vite_pid = nil
 
       if File.directory?(frontend_dir)

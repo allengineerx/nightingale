@@ -1,4 +1,6 @@
-require 'json'
+# frozen_string_literal: true
+
+require "json"
 
 module Nightingale
   class Runner
@@ -38,7 +40,7 @@ module Nightingale
       rescue StandardError => e
         puts "Error running script: #{e.message}"
         puts e.backtrace
-        add_component({ type: 'error', props: { message: e.message, backtrace: e.backtrace } })
+        add_component({ type: "error", props: { message: e.message, backtrace: e.backtrace } })
       ensure
         Thread.current[:nightingale_runner] = nil
       end
@@ -70,7 +72,8 @@ module Nightingale
 
     def event_triggered?(key, event_type)
       return false unless @current_event
-      @current_event['id'] == key && @current_event['event'] == event_type
+
+      @current_event["id"] == key && @current_event["event"] == event_type
     end
   end
 end
