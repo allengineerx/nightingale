@@ -1,0 +1,41 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+require 'fileutils'
+
+# Add lib to load path
+$LOAD_PATH.unshift File.expand_path('../lib', __dir__)
+
+require 'nightingale'
+
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: nightingale [options] [command]"
+
+  opts.on("-v", "--version", "Show version") do
+    puts "Nightingale v0.1.0"
+    exit
+  end
+end.parse!
+
+command = ARGV.shift
+
+case command
+when 'new'
+  app_name = ARGV.shift
+  if app_name.nil?
+    puts "Error: Please provide an app name."
+    exit 1
+  end
+  Nightingale::CLI.new_project(app_name)
+when 'run'
+  script_path = ARGV.shift
+  if script_path.nil?
+    puts "Error: Please provide a script to run."
+    exit 1
+  end
+  Nightingale::CLI.run(script_path)
+else
+  puts "Unknown command: #{command}"
+  puts "Available commands: new, run"
+end
